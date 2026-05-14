@@ -14,7 +14,7 @@ class Pipeline:
         data = self.extract_data()
         df = self.transform_data(data)
         df.to_csv(self.csv_path, index=False)
-
+        self.load_data()
 
     def extract_data(self) -> dict:
         """metodo para extraer los datos de la API"""
@@ -58,3 +58,13 @@ class Pipeline:
         except Exception as e:
             print(f"Error al transformar los datos: {e}")
             return None
+
+    def load_data(self):
+        """metodo para leer csv y subirlo a la base de datos"""
+        try:
+            df = pd.read_csv(self.csv_path) # leyendo csv
+            conn = sqlite3.connect(self.db_path) # creando conexion
+            df.to_sql('clima', conn, if_exists='replace', index=False) # cargando datos (se remplaza si existe)
+            conn.close()
+        except Exception as e:
+            print(f"Error al cargar los datos: {e}")

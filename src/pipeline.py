@@ -1,20 +1,23 @@
 import sqlite3
 import requests
-import pandas as pd
+import pandas as pd 
 
 
 class pipeline:
-    def __init__(self, db_path, api_endpoint):
+    def __init__(self, db_path:str, csv_path:str, api_endpoint:str):
         self.db_path = db_path
+        self.csv_path = csv_path
         self.api_endpoint = api_endpoint
 
     def run(self):
         """metodo para ejecutar el ETL"""
         data = self.extract_data()
-        print(data)
+        df = self.transform_data(data)
+        print(df)
+        df.to_csv(self.csv_path, index=False)
 
 
-    def extract_data(self):
+    def extract_data(self) -> dict:
         """metodo para extraer los datos de la API"""
         try:
             response = requests.get(self.api_endpoint)
@@ -27,4 +30,32 @@ class pipeline:
             return data
         except requests.exceptions.RequestException as e:
             print(f"Error al extraer los datos: {e}")
+            return None
+    
+    def transform_data(self, data:dict) -> pd.DataFrame:
+        """metodo para transformar los datos"""
+        try:
+            hourly = data['hourly'] # los datos que interesan están en hourly
+            df = pd.DataFrame(hourly)
+
+            df['time'] = pd.to_datetime(df['time']) # transformando columna time a datetime
+            df = df.rename(columns={# renombrando columnas
+                'time': 'fecha',
+                'temperature_2m': 'temperatura_c',
+                'precipitation': 'precipitacion_mm'
+            })
+
+            #filtrando horas (solo de 6 am a 10 pm)
+            df = df[(df['fecha'].dt.hour >= 6) & (df['fecha'].dt.hour <= 22)]
+
+            # verificando cuantos registros tienen valores nulos o negativos en cualquier columna numerica
+            nulos_o_negativos = df[(df['temperatura_c'].isnull()) | (df['temperatura_c'] < 0) | (df['precipitacion_mm'].isnull()) | (df['precipitacion_mm'] < 0)]
+            print(f"Cantidad de registros con valores nulos o negativos: {len(nulos_o_negativos)}")
+            
+            # si hay registros con valores nulos o negativos, se eliminan
+            df = df.drop(nulos_o_negativos.index)
+            
+            return df
+        except Exception as e:
+            print(f"Error al transformar los datos: {e}")
             return None

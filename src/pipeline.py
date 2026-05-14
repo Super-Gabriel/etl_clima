@@ -18,6 +18,7 @@ class Pipeline:
 
     def extract_data(self) -> dict:
         """metodo para extraer los datos de la API"""
+        print('\nIniciando proceso de extracción...')
         try:
             response = requests.get(self.api_endpoint) # consulta a la API
             status_code = response.status_code # status code de la respuesta
@@ -26,6 +27,7 @@ class Pipeline:
                 raise Exception(f"Error al extraer los datos: {status_code}")
             
             data = response.json() # convirtiendo la respuesta a json
+            print('Extracción completada.')
             return data
         except Exception as e: # manejando errores de peticiones
             print(f"Error al extraer los datos: {e}")
@@ -33,6 +35,7 @@ class Pipeline:
     
     def transform_data(self, data:dict) -> pd.DataFrame:
         """metodo para transformar los datos"""
+        print('\nIniciando proceso de transformación...')
         try:
             hourly = data['hourly'] # los datos que interesan están en hourly
             df = pd.DataFrame(hourly)
@@ -54,7 +57,7 @@ class Pipeline:
             
             # si hay registros con valores nulos o negativos, se eliminan
             df = df.drop(nulos_o_negativos.index)
-            
+            print('Transformación completada.')
             return df
         except Exception as e:
             print(f"Error al transformar los datos: {e}")
@@ -62,10 +65,12 @@ class Pipeline:
 
     def load_data(self):
         """metodo para leer csv y subirlo a la base de datos"""
+        print('\nIniciando proceso de carga...')
         try:
             df = pd.read_csv(self.csv_path) # leyendo csv
             conn = sqlite3.connect(self.db_path) # creando conexion
             df.to_sql('clima', conn, if_exists='replace', index=False) # cargando datos (se remplaza si existe)
             conn.close()
+            print('Carga completada.')
         except Exception as e:
             print(f"Error al cargar los datos: {e}")

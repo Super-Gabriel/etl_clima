@@ -3,7 +3,7 @@ import requests
 import pandas as pd 
 
 
-class pipeline:
+class Pipeline:
     def __init__(self, db_path:str, csv_path:str, api_endpoint:str):
         self.db_path = db_path
         self.csv_path = csv_path
@@ -13,7 +13,6 @@ class pipeline:
         """metodo para ejecutar el ETL"""
         data = self.extract_data()
         df = self.transform_data(data)
-        print(df)
         df.to_csv(self.csv_path, index=False)
 
 
@@ -28,7 +27,7 @@ class pipeline:
             
             data = response.json() # convirtiendo la respuesta a json
             return data
-        except requests.exceptions.RequestException as e: # manejando errores de peticiones
+        except Exception as e: # manejando errores de peticiones
             print(f"Error al extraer los datos: {e}")
             return None
     

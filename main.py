@@ -9,6 +9,6 @@ api_endpoint = """https://api.open-meteo.com/v1/forecast?latitude=19.43&longitud
 
 if __name__ == "__main__":
     os.makedirs(data_path, exist_ok=True) # creando directorio data si no existe
-    from src.pipeline import pipeline
-    pipeline = pipeline(db_path, csv_path, api_endpoint)
+    from src.pipeline import Pipeline
+    pipeline = Pipeline(db_path, csv_path, api_endpoint)
     pipeline.run()

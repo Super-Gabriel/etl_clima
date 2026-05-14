@@ -20,15 +20,15 @@ class pipeline:
     def extract_data(self) -> dict:
         """metodo para extraer los datos de la API"""
         try:
-            response = requests.get(self.api_endpoint)
-            status_code = response.status_code
+            response = requests.get(self.api_endpoint) # consulta a la API
+            status_code = response.status_code # status code de la respuesta
             
-            if status_code != 200:
+            if status_code != 200: # verificando que el status code sea 200
                 raise Exception(f"Error al extraer los datos: {status_code}")
             
-            data = response.json()
+            data = response.json() # convirtiendo la respuesta a json
             return data
-        except requests.exceptions.RequestException as e:
+        except requests.exceptions.RequestException as e: # manejando errores de peticiones
             print(f"Error al extraer los datos: {e}")
             return None
     

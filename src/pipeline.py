@@ -47,8 +47,9 @@ class Pipeline:
             #filtrando horas (solo de 6 am a 10 pm)
             df = df[(df['fecha'].dt.hour >= 6) & (df['fecha'].dt.hour <= 22)]
 
-            # verificando cuantos registros tienen valores nulos o negativos en cualquier columna numerica
-            nulos_o_negativos = df[(df['temperatura_c'].isnull()) | (df['temperatura_c'] < 0) | (df['precipitacion_mm'].isnull()) | (df['precipitacion_mm'] < 0)]
+            numeric_cols = df.select_dtypes(include='number').columns # obteniendo columnas numericas
+            mask = df[numeric_cols].isnull().any(axis=1) | (df[numeric_cols] < 0).any(axis=1) # verificando nulos o negativos en cualquier columna numerica
+            nulos_o_negativos = df[mask]
             print(f"Cantidad de registros con valores nulos o negativos: {len(nulos_o_negativos)}")
             
             # si hay registros con valores nulos o negativos, se eliminan
